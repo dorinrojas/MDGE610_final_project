@@ -89,7 +89,7 @@ software was conducted using the following command in the terminal:
   CMAKE_POLICY_VERSION_MINIMUM=3.5 make -j$(sysctl -n hw.ncpu) || make -j$(sysctl -n hw.ncpu)
   
   ## Verification
-  kallisto version 
+  ./src/kallisto version 
     #> kallisto, version 0.51.1
   ```
 > Note: several modification were made over the installation instructions to fit the
