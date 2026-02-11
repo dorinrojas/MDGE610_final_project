@@ -97,7 +97,7 @@ local computer in which was installed. The authors thanks the professor the help
 provided over the solution to these issues. To see the original installation instruction
 visit the [kallisto GitHub repository](https://github.com/pachterlab/kallisto).
 
-The [kallisto folder](/kallisto @ 4e9f29c/) here stored represents a direct link 
+The [kallisto folder](https://github.com/pachterlab/kallisto) here stored represents a direct link 
 to the original repository. Thus, a copy of the [expectation-maximization (EM) algorithm](/empiricalInvestigation/EMAlgorithm.h)
 was created allowing for direct modification and track changes of the pertinent 
 alterations of the convergence criteria for the purpose of this assignment. This document 
