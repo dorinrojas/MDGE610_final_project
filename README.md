@@ -103,4 +103,6 @@ the kallisto EM algorithm was modified as followed:
 ## Acknowledgement
 
 This assignment is dedicated to David Rojas Rodríguez, who heard the author
-talk about expectation-maximization and equivalence classes for over a week.
+talk about expectation-maximization and equivalence classes for over a week. He 
+said he enjoyed listening to audio messages about the topic like a podcast while 
+doing the dishes.
