@@ -107,13 +107,34 @@ could not be directly pushed into the current remote.
 ## Brief assignment methods
 
 This assignment aims to understand the effect of convergence criteria values into
-the relative difference between analyzed simulated data and their ground truth. For this
-the kallisto EM algorithm was modified as followed:
+the relative difference between analyzed simulated data and their ground truth. 
+For this, the convergence criteria of minimum threshold of abundance (`alpha_change_limit`) 
+and maximum variance between iteration (`alpha_change`) were modified in the 
+`EMAlgorithm.h` file. Specific parameter values definition are stated below; 
+the assigned letters are defined for tracking purposes.
 
+|   | |  A | B  | C (default) |  D | E  |
+|    | |1.0|0.1|   0.01      |0.001|0.0001|
+|:---|:-- |:----:|:----:|:-------------:|:----:|:----:|
+| V |2.0 | AV | BV |     CV      | DV | EV |
+| W |1.5 | AW | BW |     CW      | DW | EW |
+| X (default) | 1.0| AX | BX |     CX      | DX | EX |
+| Y |0.5 | AY | BY |     CY      | DY | EY |
+| Z |0.1 | AZ | BZ |     CZ      | DZ | EZ |
+Letter A-E represent values for minimum threshold of abundance, and Z-V represent
+the maximum variable between iterations.
 
+: Prefix combinations for convergence criteria analysis.
 
+The relative difference between each trial and the difference in estimated 
+abundances and ground truth were assessed using false positive counts and 
+correlation analysis.
 
-## Acknowledgement
+## Main findings 
+
+[]
+
+## Acknowledgements
 
 This assignment is dedicated to David Rojas Rodríguez, who heard the author
 talk about expectation-maximization and equivalence classes for over a week. He 
