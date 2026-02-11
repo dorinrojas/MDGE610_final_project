@@ -14,7 +14,7 @@ Foundations in bioinformatics.
 
 | Path | Description |
 |------|-------------|
-| `/assignment_handout.pdf` | Assignment instructions |
+| `assignment_handout.pdf` | Assignment instructions |
 | `Written_report.pdf` | Rendered written report |
 | `Written_report.qmd` | Source quarto file of written report |
 | `log-likelihood_function_kallisto.png` | Figure 1 of written report |
