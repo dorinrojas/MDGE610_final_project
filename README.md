@@ -115,16 +115,15 @@ and maximum variance between iteration (`alpha_change`) were modified in the
 was assigned as output folder prefix for tracking purposes. Specific parameter 
 values definition and assigned letters combinations are stated below.
 
-|         |A (1.0)|B (0.1)|C (0.01; default)|D (0.001)|E (0.0001)[^1]|
+```{table} Prefix combinations for convergence criteria analysis.
+|         |A (1.0)|B (0.1)|C (0.01; default)|D (0.001)|E (0.0001)|
 |:--------|:-----:|:-----:|:---------------:|:-------:|:--------:|
 | **V (2.0)** | AV | BV |     CV      | DV | EV |
-| **W (1.5) **| AW | BW |     CW      | DW | EW |
+| **W (1.5)** | AW | BW |     CW      | DW | EW |
 | **X (1.0; default)** | AX | BX |     CX      | DX | EX |
 | **Y (0.5)** | AY | BY |     CY      | DY | EY |
-| **Z (0.1)[^2]** | AZ | BZ |     CZ      | DZ | EZ |
-
-: Prefix combinations for convergence criteria analysis.
-
+| **Z (0.1)** | AZ | BZ |     CZ      | DZ | EZ |
+```
 
 The relative difference between each trial and the difference in estimated 
 abundances and ground truth were assessed using false positive counts and 
