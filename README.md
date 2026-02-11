@@ -124,8 +124,6 @@ values definition and assigned letters combinations are stated below.
 | **Z (0.1)[^2]** | AZ | BZ |     CZ      | DZ | EZ |
 
 : Prefix combinations for convergence criteria analysis.
-[^1]: Letters A-E represent values for minimum threshold of abundance
-[^2]: Letters Z-V represent the maximum variable between iterations.
 
 
 The relative difference between each trial and the difference in estimated 
