@@ -110,21 +110,23 @@ This assignment aims to understand the effect of convergence criteria values int
 the relative difference between analyzed simulated data and their ground truth. 
 For this, the convergence criteria of minimum threshold of abundance (`alpha_change_limit`) 
 and maximum variance between iteration (`alpha_change`) were modified in the 
-`EMAlgorithm.h` file. Specific parameter values definition are stated below; 
-the assigned letters are defined for tracking purposes.
+`EMAlgorithm.h` file. Each parameter value was defined with an alphabet letter 
+(abundance threshold = A-E; variance threshold = Z-V) and a paired combination 
+was assigned as output folder prefix for tracking purposes. Specific parameter 
+values definition and assigned letters combinations are stated below.
 
-|   | |  A | B  | C (default) |  D | E  |
-|    | |1.0|0.1|   0.01      |0.001|0.0001|
-|:---|:-- |:----:|:----:|:-------------:|:----:|:----:|
-| V |2.0 | AV | BV |     CV      | DV | EV |
-| W |1.5 | AW | BW |     CW      | DW | EW |
-| X (default) | 1.0| AX | BX |     CX      | DX | EX |
-| Y |0.5 | AY | BY |     CY      | DY | EY |
-| Z |0.1 | AZ | BZ |     CZ      | DZ | EZ |
-Letter A-E represent values for minimum threshold of abundance, and Z-V represent
-the maximum variable between iterations.
+|         |A (1.0)|B (0.1)|C (0.01; default)|D (0.001)|E (0.0001)[^1]|
+|:--------|:-----:|:-----:|:---------------:|:-------:|:--------:|
+| V (2.0) | AV | BV |     CV      | DV | EV |
+| W (1.5) | AW | BW |     CW      | DW | EW |
+| X (1.0; default) | AX | BX |     CX      | DX | EX |
+| Y (0.5) | AY | BY |     CY      | DY | EY |
+| Z (0.1)[^2] | AZ | BZ |     CZ      | DZ | EZ |
 
 : Prefix combinations for convergence criteria analysis.
+[^1]: Letters A-E represent values for minimum threshold of abundance
+[^2]: Letters Z-V represent the maximum variable between iterations.
+
 
 The relative difference between each trial and the difference in estimated 
 abundances and ground truth were assessed using false positive counts and 
