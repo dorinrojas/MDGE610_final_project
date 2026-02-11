@@ -18,6 +18,8 @@ Foundations in bioinformatics.
 | `Written_report.pdf` | Rendered written report |
 | `Written_report.qmd` | Source quarto file of written report |
 | `log-likelihood_function_kallisto.png` | Figure 1 of written report |
+| `kallisto @ 4e9f29c/` | Submodule of kallisto repository |
+| `empiricalInvestigation/EMAlgorithm.h` | Mirror EM algorithm to local kallisto |
 | `empiricalInvestigation/gencode.v44.kidx` | Pre-built kallisto index (GENCODE v44 protein-coding transcripts) |
 | `empiricalInvestigation/sim_true_counts.txt` | Ground truth transcript counts |
 | `empiricalInvestigation/00-raw-data/sim_reads_1.fastq.gz` | Simulated paired-end reads (read 1) |
@@ -56,12 +58,24 @@ software was conducted using the following command in the terminal:
   ## CMake
   brew install cmake
   
-  # Installing kallisto software
+  # Iniial copy of kallisto
   ## Cloning repository
   git clone https://github.com/pachterlab/kallisto.git
-  cd kallisto
   
+  ## Commiting as a submodule
+  git submodule add https://github.com/pachterlab/kallisto.git kallisto
+  git commit -m 'Original Kallisto'
+  git push origin main
+  
+  ## Copy EMAlgorithm.h mirror file
+  cp kallisto/src/EMAlgorithm.h .
+  mv EMAlgorithm.h empiricalInvestigation 
+  git commit -m 'Original EM algorithm code'
+  git push origin main
+  
+  # Installion of local kallisto software
   ## Removing incompatibility arguments (x86-only -mno-avx2 flag)
+  cd kallisto
   sed -i '' 's/-mno-avx2//g' ext/bifrost/CMakeLists.txt
   
   ## Fix the DataStorage.tcc typo (see #488)
@@ -74,22 +88,21 @@ software was conducted using the following command in the terminal:
   ## Build (|| handles a possible race condition on first run)
   CMAKE_POLICY_VERSION_MINIMUM=3.5 make -j$(sysctl -n hw.ncpu) || make -j$(sysctl -n hw.ncpu)
   
-  # Modifying cloned repository origin
-  ## Remove original remote location 
-  
-  ## Adding current repository remote location 
-  
-  ## Commit and push
+  ## Verification
+  kallisto version 
+    #> kallisto, version 0.51.1
   ```
 > Note: several modification were made over the installation instructions to fit the
 local computer in which was installed. The authors thanks the professor the help
 provided over the solution to these issues. To see the original installation instruction
 visit the [kallisto GitHub repository](https://github.com/pachterlab/kallisto).
 
-The [kallisto folder](/kallisto/) here stored represents a copy of the original repository 
-created for allowing the track changes of the pertinent modification of the convergence 
-criteria in the [expectation-maximization (EM) algorithm](/kallisto/src/EMAlgorithm.h)
-for the purpose of this assignment.
+The [kallisto folder](/kallisto @ 4e9f29c/) here stored represents a direct link 
+to the original repository. Thus, a copy of the [expectation-maximization (EM) algorithm](/empiricalInvestigation/EMAlgorithm.h)
+was created allowing for direct modification and track changes of the pertinent 
+alterations of the convergence criteria for the purpose of this assignment. This document 
+represents a mirror of modifications performed on the local repository cloned that 
+could not be directly pushed into the current remote.
 
 ## Brief assignment methods
 
