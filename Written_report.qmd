@@ -2,6 +2,10 @@
 title: "Written Report"
 author: "Dorian Rojas Villalta"
 format: pdf
+include-in-header: 
+  text: |
+    \usepackage{fvextra}
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
 editor: visual
 ---
 
@@ -53,12 +57,66 @@ Another advantage of kallisto is that the EM-optimized likelihood function is de
 
 The convergence criteria for stopping the iterations is determine by the total expected value of fragment belonging to an specific transcript ($\alpha_tN$). Authors define the end of the iterations as for when every transcript $t$, the total expected value is above 0.01 allowing for a change less than 1% iteration to iteration. In simpler words, the iterations of the expectation maximization algorithm stop when all of the transcripts have an minimum 0.01 abundance and its variance is less than 1% between iterations.
 
-This specification is stated in the source code for the EM algorithm of the kallisto software. The file can be found at the directory `/kallisto/src/EMAlgorithm.h`. The specific location of this convergence criteria can be found in the lines 
+This specification is stated in the source code for the EM algorithm of the kallisto software. The file can be found at the directory `/kallisto/src/EMAlgorithm.h`. The specific location of this convergence criteria can be found in the lines [100-104]:
 
-```{c++}
+```cpp
+    double denom;
+    const double alpha_limit = 1e-7;
+    const double alpha_change_limit = 1e-2;
+    const double alpha_change = 1e-2;
+    bool finalRound = false;
 ```
 
-Here, this coding represents []
+Here, the main convergence criteria parameters are defined using the C++ code language. These are determine according to `[attributes] <data type> <variable name> = <value>`. Thus, `double` defines a double variable (with decimals), `const` a constant variable (not intended to be modified by the function), and `bool` a boolean variable (`true` or `false`). The variable `alpha_limit` is the minimum threshold of abundance of a transcript, `alpha_change_limit` is the threshold of abundance 0.01 during maximization, and `alpha_change` is the allowed 1% abundance variability between iterations. Other variables such as `finalRound` determines the end of iterations (see below), and `denom` is an empty variable for later calculation of the denominator for normalizing read counts in case raw counts are provided.
+
+The test of the convergence criteria is set in the code lines [173-209, comments removed]
+
+```cpp
+ bool stopEM = false; //!finalRound && (i >= min_rounds); // false initially
+      //double maxChange = 0.0;
+      int chcount = 0;
+      for (int ec = 0; ec < num_trans_; ec++) {
+        if (next_alpha[ec] > alpha_change_limit && (std::fabs(next_alpha[ec] - alpha_[ec]) / next_alpha[ec]) > alpha_change) {
+          chcount++;
+        }
+
+        // reassign alpha_ to next_alpha
+        alpha_[ec] = next_alpha[ec];
+
+        // clear all next_alpha values 0 for next iteration
+        next_alpha[ec] = 0.0;
+      }
+
+      //std::cout << chcount << std::endl;
+      if (chcount == 0 && i > min_rounds) {
+
+        stopEM=true;
+      }
+      
+      if (finalRound) {
+        break;
+      }
+```
+
+This defines the boolean variable `stopEM` to `false` prior assessing for the convergence criteria and the integer `chcount` that keeps track of over 1% variation changes in the `alpha` variables (meaning expected abundance $\alpha_tN$), which would deem that there is no convergence yet. For all equivalence class (`ec`), the `next_alpha[ec]` (expected abundance of current iteration) are tested for minimum abundance threshold of 0.01 and a variation to the previous iteration (`alpha_[ec]`) exceeding 1% (`alpha_change`). If this criteria is met, the `chcount` increases in one unit, else the value remains 0 (indicating convergence). Also, previous iteration alpha variable (`alpha_[ec]`) is set with the value of current iteration before zeroing it for the next iteration. Later, the presence of convergence and minimum number of iteration (50) is checked (`chcount == 0 && i > min_rounds`) and, when true, the `stopEM` variable is set to `true`, indicating that this corresponds to the final iteration.
+
+It is important to notice that this structure also checks for whether the current iteration is the final round, leading to a break in the expectation maximization algorithm. This variable (`finalRound`) is defined a few lines after this convergence check loop [lines 211-221]:
+
+```cpp
+      //std::cout << maxChange << std::endl;
+      if (stopEM) {
+        finalRound = true;
+        alpha_before_zeroes_.resize( alpha_.size() );
+        for (int ec = 0; ec < num_trans_; ec++) {
+          alpha_before_zeroes_[ec] = alpha_[ec];
+          if (alpha_[ec] < alpha_limit/10.0) {
+            alpha_[ec] = 0.0;
+          }
+        }
+      }
+```
+
+This specific loop of the expectation maximization function indicates that when the boolean variable `stopEM` becomes true, meaning that convergence has been met, the total equivalence classes will be filtered. Within this control structure, the `finalRound` variable is defined as `true`, which will allow for breaking the expectation maximization in the structure defined above. Also, current iteration values of expected abundance are save on a different variable (`alpha_before_zeroes_`), most probably as a backup. Then, the values of each equivalence class (`alpha_[ec]`) are zeroing if their value is lower than `alpha_limit/10.0`. Overall, these commands define the end of the algorithm and filter low abundance equivalence classes.
 
 **How might these criteria be justified**
 
@@ -77,6 +135,10 @@ IT IS FUCKING ALBITRARY IF U ASK ME
 # Second Section. Empirical investigation
 
 ## Testing Convergence Criteria
+
+.
+.
+.
 
 When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
