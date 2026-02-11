@@ -100,7 +100,7 @@ struct EMAlgorithm {
     double denom;
     const double alpha_limit = 1e-7;
     const double alpha_change_limit = 1e-2;
-    const double alpha_change = 1e-2;
+    const double alpha_change = 2.0;
     bool finalRound = false;
 
     if (verbose) {
