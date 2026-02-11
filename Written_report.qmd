@@ -55,7 +55,7 @@ Another advantage of kallisto is that the EM-optimized likelihood function is de
 
 **What convergence criteria does kallisto use to decide when to stop iterating? Where are these specified in the code**
 
-The convergence criteria for stopping the iterations is determine by the total expected value of fragment belonging to an specific transcript ($\alpha_tN$). Authors define the end of the iterations as for when every transcript $t$, the total expected value is above 0.01 allowing for a change less than 1% iteration to iteration. In simpler words, the iterations of the expectation maximization algorithm stop when all of the transcripts have an minimum 0.01 abundance and its variance is less than 1% between iterations.
+The convergence criteria for stopping the iterations is determine by the total expected value of fragment belonging to an specific transcript ($\alpha_tN$). Authors define the end of the iterations as for when every transcript $t$, the total expected value is above 0.01 transcript per million (TPM) allowing for a change less than 1% iteration to iteration. In simpler words, the iterations of the expectation maximization algorithm stop when all of the transcripts have an minimum 0.01 TPM abundance and its variance is less than 1% between iterations.
 
 This specification is stated in the source code for the EM algorithm of the kallisto software. The file can be found at the directory `/kallisto/src/EMAlgorithm.h`. The specific location of this convergence criteria can be found in the lines [100-104]:
 
@@ -67,7 +67,7 @@ This specification is stated in the source code for the EM algorithm of the kall
     bool finalRound = false;
 ```
 
-Here, the main convergence criteria parameters are defined using the C++ code language. These are determine according to `[attributes] <data type> <variable name> = <value>`. Thus, `double` defines a double variable (with decimals), `const` a constant variable (not intended to be modified by the function), and `bool` a boolean variable (`true` or `false`). The variable `alpha_limit` is the minimum threshold of abundance of a transcript, `alpha_change_limit` is the threshold of abundance 0.01 during maximization, and `alpha_change` is the allowed 1% abundance variability between iterations. Other variables such as `finalRound` determines the end of iterations (see below), and `denom` is an empty variable for later calculation of the denominator for normalizing read counts in case raw counts are provided.
+Here, the main convergence criteria parameters are defined using the C++ code language. These are determine according to `[attributes] <data type> <variable name> = <value>`. Thus, `double` defines a double variable (with decimals), `const` a constant variable (not intended to be modified by the function), and `bool` a boolean variable (`true` or `false`). The variable `alpha_limit` is the minimum threshold of abundance of a transcript, `alpha_change_limit` is the threshold of abundance 0.01 TPM during maximization, and `alpha_change` is the allowed 1% abundance variability between iterations. Other variables such as `finalRound` determines the end of iterations (see below), and `denom` is an empty variable for later calculation of the denominator for normalizing read counts in case raw counts are provided.
 
 The test of the convergence criteria is set in the code lines [173-209, comments removed]
 
@@ -98,7 +98,7 @@ The test of the convergence criteria is set in the code lines [173-209, comments
       }
 ```
 
-This defines the boolean variable `stopEM` to `false` prior assessing for the convergence criteria and the integer `chcount` that keeps track of over 1% variation changes in the `alpha` variables (meaning expected abundance $\alpha_tN$), which would deem that there is no convergence yet. For all equivalence class (`ec`), the `next_alpha[ec]` (expected abundance of current iteration) are tested for minimum abundance threshold of 0.01 and a variation to the previous iteration (`alpha_[ec]`) exceeding 1% (`alpha_change`). If this criteria is met, the `chcount` increases in one unit, else the value remains 0 (indicating convergence). Also, previous iteration alpha variable (`alpha_[ec]`) is set with the value of current iteration before zeroing it for the next iteration. Later, the presence of convergence and minimum number of iteration (50) is checked (`chcount == 0 && i > min_rounds`) and, when true, the `stopEM` variable is set to `true`, indicating that this corresponds to the final iteration.
+This defines the boolean variable `stopEM` to `false` prior assessing for the convergence criteria and the integer `chcount` that keeps track of over 1% variation changes in the `alpha` variables (meaning expected abundance $\alpha_tN$), which would deem that there is no convergence yet. For all equivalence class (`ec`), the `next_alpha[ec]` (expected abundance of current iteration) are tested for minimum abundance threshold of 0.01 TPM and a variation to the previous iteration (`alpha_[ec]`) exceeding 1% (`alpha_change`). If this criteria is met, the `chcount` increases in one unit, else the value remains 0 (indicating convergence). Also, previous iteration alpha variable (`alpha_[ec]`) is set with the value of current iteration before zeroing it for the next iteration. Later, the presence of convergence and minimum number of iteration (50) is checked (`chcount == 0 && i > min_rounds`) and, when true, the `stopEM` variable is set to `true`, indicating that this corresponds to the final iteration.
 
 It is important to notice that this structure also checks for whether the current iteration is the final round, leading to a break in the expectation maximization algorithm. This variable (`finalRound`) is defined a few lines after this convergence check loop [lines 211-221]:
 
@@ -120,17 +120,19 @@ This specific loop of the expectation maximization function indicates that when 
 
 **How might these criteria be justified**
 
-IT IS FUCKING ALBITRARY IF U ASK ME 
+Since the criteria is based on a minimum threshold of abundance for each of the equivalence classes, it might indicate this is a value considered expected in RNA-seq quantification analysis. In other words, it is expected to find transcripts of minimum abundance 0.01 TPM to be reliable in alignment-based quantification and lower abundance could be associated to alignment mismatches. Moreover, another criteria used to determine convergence is less than 1% variation in expected abundance estimation between iterations. This is based on the premise of the expectation maximization algorithm where standard deviation of the likelihood function is considered to be constant when its maximum estimate is reached. 
+
+Regardless of the fundamental basis for the selection of the criteria, authors do not declare the logic behind defining these variable to minimum threshold of 0.01 TPM and maximum variance of 1% between iteration. In order to understand the rationale, this assignment aims to understand the effect of convergence criteria values into the relative difference between analyzed simulated data and their ground truth (see Second Section. Empirical investigation).
 
 ## Local vs. Global Maxima
 
 **Examine how kallisto initializes its abundance estimates**
 
-[]
+The abundance estimation of the equivalence classes initializes from the so-called pseudoalignment performed by the kallisto software. This approach is set to identify the transcript from which the read might have been originated without information regarding position alignment. For this, hashing of $k$-mers (nucleotide sequences of $k$ lenght) for both the reference (transcriptome de Brujin graph) and the input reads is conducted. Hashing refers of transforming the proper sequences into numerical values. These values are then use to find the best pairwise match between the reads and reference, which results in reads assigned to a specific path of the reference transcriptome. The vertices of this matching are different read $k$-mers called $k$-compatibility classes. It is considered that these classes of an error-free read coincide with the equivalence class of the read (the transcript from where the read could have been originated). The equivalence classes are commonly estimated from alignment-based quantification approaches, which are time-consuming and computationally-demanding. However, by conducting a pseudoalignment that estimates an equivalent $k$-compatibility classes, these can serve as the initial abundance estimate for the expectation maximization algorithm.
 
 **Do you think initialization matter for this problem? Why or why not?**
 
-[]
+Yes, the aim of the expectation maximization algorithm is to conduct an estimation of missing data (equivalence classes) from the observed data ($k$-compatibility classes) in order to maximize the likelihood estimate (transcript abundance). Without this initialization process, the algorithm could not be implemented. The novelty of kallisto relies on the implementation of the pseudoalignment, a faster and computationally-lighter method of quantification, with the EM-function, a rapid and accurate optimization of objective function, to complete the missing information require to obtain reliable transcripts abundance estimates.
 
 # Second Section. Empirical investigation
 
