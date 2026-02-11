@@ -39,7 +39,7 @@ The missing data of the kallisto software is the equivalent classes of the trans
 
 ## kallisto's Objective Function
 
-**What is the mathematical form of the objective function**
+**What is the mathematical form of the objective function?**
 
 The mathematical function that represents the likelihood function for the abundance quantitation of the RNA sequencing is:
 
@@ -47,13 +47,13 @@ The mathematical function that represents the likelihood function for the abunda
 
 Here, $F$ and $T$ represent the total set of fragments ($f$) and transcripts ($t$), respectively. $l_t$ is the effective length of transcript $t$ (length with pseudoalignment) and $y_{f,t}$ is the compatibility matrix (where 1 is compatibility/pseudoalignment between $f$ and $t$ and 0 equals no compatibility). Finally, $\alpha_t$ represents the probability of selecting fragments from transcripts. Overall, this formula represents the product over equivalence classes, with $c_e$ being the number of counts observed of equivalence class $e$.
 
-**How does kallisto's EM implementation maximize it**
+**How does kallisto's EM implementation maximize it?**
 
 The expectation maximization algorithm implemented by kallisto aims to expect the equivalence classes (the transcript from which the read might come from) by maximizing the probability of selecting a fragment from a specific transcript $\alpha_t$. This means that it optimizes the chances of obtaining a read to be associated to an specific transcript, which would serve as the needed information for estimation of their respective abundance.
 
 Another advantage of kallisto is that the EM-optimized likelihood function is defined in term of equivalent classes. This allows for a significant reduction in the dataset that needs to be analyze, resulting in a faster sotfware in comparison to previous tools that conduct alignments.
 
-**What convergence criteria does kallisto use to decide when to stop iterating? Where are these specified in the code**
+**What convergence criteria does kallisto use to decide when to stop iterating? Where are these specified in the code?**
 
 The convergence criteria for stopping the iterations is determine by the total expected value of fragment belonging to an specific transcript ($\alpha_tN$). Authors define the end of the iterations as for when every transcript $t$, the total expected value is above 0.01 transcript per million (TPM) allowing for a change less than 1% iteration to iteration. In simpler words, the iterations of the expectation maximization algorithm stop when all of the transcripts have an minimum 0.01 TPM abundance and its variance is less than 1% between iterations.
 
@@ -118,7 +118,7 @@ It is important to notice that this structure also checks for whether the curren
 
 This specific loop of the expectation maximization function indicates that when the boolean variable `stopEM` becomes true, meaning that convergence has been met, the total equivalence classes will be filtered. Within this control structure, the `finalRound` variable is defined as `true`, which will allow for breaking the expectation maximization in the structure defined above. Also, current iteration values of expected abundance are save on a different variable (`alpha_before_zeroes_`), most probably as a backup. Then, the values of each equivalence class (`alpha_[ec]`) are zeroing if their value is lower than `alpha_limit/10.0`. Overall, these commands define the end of the algorithm and filter low abundance equivalence classes.
 
-**How might these criteria be justified**
+**How might these criteria be justified?**
 
 Since the criteria is based on a minimum threshold of abundance for each of the equivalence classes, it might indicate this is a value considered expected in RNA-seq quantification analysis. In other words, it is expected to find transcripts of minimum abundance 0.01 TPM to be reliable in alignment-based quantification and lower abundance could be associated to alignment mismatches. Moreover, another criteria used to determine convergence is less than 1% variation in expected abundance estimation between iterations. This is based on the premise of the expectation maximization algorithm where standard deviation of the likelihood function is considered to be constant when its maximum estimate is reached. 
 
@@ -138,21 +138,90 @@ Yes, the aim of the expectation maximization algorithm is to conduct an estimati
 
 ## Testing Convergence Criteria
 
-.
-.
-.
+As previously mentioned, this assignment aims to understand the effect of convergence criteria values into the relative difference between analyzed simulated data and their ground truth. For this, the convergence criteria of minimum threshold of abundance (`alpha_change_limit`) and maximum variance between iteration (`alpha_change`) were modified in the `EMAlgorithm.h` file. 
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+The altered software ran on MacBook Air with Apple M4 10 cores and 16GB of RAM local system. The rebuild of each modified binary was conducted using the following code on local terminal, similar to the initial installation (see `README.md`). 
 
-```{r}
-1 + 1
+```bash
+rm -rf build # Removing previous built
+mkdir build && cd build # Re-building with modified EMAlgorithm.h file
+CMAKE_POLICY_VERSION_MINIMUM=3.5 cmake .. -DENABLE_AVX2=OFF -DCOMPILATION_ARCH=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
+## Build (|| handles a possible race condition on first run)
+CMAKE_POLICY_VERSION_MINIMUM=3.5 make -j$(sysctl -n hw.ncpu) || make -j$(sysctl -n hw.ncpu)
+
+## Verification
+kallisto version 
 ```
 
-You can add options to executable code like this
+### Parameters modification
 
-```{r}
-#| echo: false
-2 * 2
+A total of five alterations per convergence criteria was performed, with specific unit change based on their nature, resulting in a total of 25 trials. Minimum abundance threshold is estimated in transcript per million (TPM) and, due its magnitude, it was modified in the logarithmic scale. The maximum variance between iterations is measured as a percentage; thus, change rate was set at 0.5 percentage ranges with a minimum of 0.1%. 
+
+The five trials for each convergence criteria included the default value and other four unit alteration were defined in a standard deviation basis around the default. Each parameter value was defined with an alphabet letter (abundance threshold = A-E; variance threshold = Z-V). The overview of the groups used for testing as well as the modified parameter values can be found in @tbl-1 and @tbl-2. Additionally, a paired combination of assigned letters was used as an output folder prefix of the kallisto trial for tracking purposes (@tbl-3). For instance, the quantification output folder with kallisto's default settings is named `/CX-output/`. 
+
+| A | B | C (default) |  D  |  E  |
+|:---:|:---:|:-------------:|:-----:|:-----:|
+|1.0|0.1|   0.01      |0.001|0.0001|
+
+: Minimum expected transcripts abundance ($\alpha_tN$; `alpha_change_limit`) modifications for testing. {#tbl-1}
+
+| Z | Y | X (default) | W | V |
+|:---:|:---:|:-------------:|:---:|:---:|
+|0.1|0.5|      1.0      |1.5| 2.0 |
+
+: Maximum variance between EM-algorithm iterations (`alpha_change`) modifications for testing. {#tbl-2} 
+
+|   |  A | B  | C (default) |  D | E  |
+|:---|:----:|:----:|:-------------:|:----:|:----:|
+| V | AV | BV |     CV      | DV | EV |
+| W | AW | BW |     CW      | DW | EW |
+| X (default) | AX | BX |     CX      | DX | EX |
+| Y | AY | BY |     CY      | DY | EY |
+| Z | AZ | BZ |     CZ      | DZ | EZ |
+
+: Prefix combinations for convergence criteria analysis. {#tbl-3}
+
+All kallisto trials were conducted using the following command:
+
+```bash
+kallisto/build/src/kallisto quant \
+  -i empiricalInvestigation/gencode.v44.kidx \
+  -o empiricalInvestigation/{prefix}-output \
+  empiricalInvestigation/00-raw-data/sim_reads_1.fastq.gz \
+  empiricalInvestigation/00-raw-data/sim_reads_2.fastq.gz
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+As defined, all results are stored in the `/empiricalInvestigation/` folder 
+available at this github repository. Additionally, each algorithm alteration was mirrored into a copy-file present at same folder and was committed to the repository joint with output files for track changes purposes.
+
+The output abundance file were further used for relative difference analysis between the different tested code modifications.
+
+## Relative difference analysis
+
+The relative difference analysis aims to establish a relationship between each of the trial test parameters and the difference between estimated abundances to ground truth. For this, each output abundance files were compared against the known abundances provided by the professor individually. First, the unique transcripts identified for each trial were assessed using simple command line R (see code below). 
+
+```{r}
+#express as a barplot. but these values will be later used a the size of the points in the heatmap comparing R from correlation analysis.
+```
+
+Here, we aim to identified the count of transcript that were only found in the trial test, but not in the ground truth, indicating a false positive identification in the pseudoalignment. The results show [].
+
+In order to understand the if there is an association between the trial parameters values and the difference in expected abundances and ground truth, a correlation analysis was conducted. This analysis compared how the values from the estimated abundances relate to those true abundances. The output of the correlation analysis is an R value that indicates how correlated how similar the values both abundances tables, with 1 being highly similar and 0 being entirely different. This R value can be used for assessing how the alteration of convergence criteria affect the abundance estimation. 
+
+```{r}
+```
+
+Notably, []
+
+Finally, we combine both the individual false positive counts and the correlation coefficient to assess a final judgement regarding the effect of convergence parameters. 
+
+```{r}
+#just heatmap
+```
+
+[]
+
+## Conclusions
+
+[]
