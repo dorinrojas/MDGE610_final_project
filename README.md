@@ -1,4 +1,4 @@
-# Final assignment github repository.
+# Final assignment
 
 MDGE 610: Foundations of Bioinformatics.
 
