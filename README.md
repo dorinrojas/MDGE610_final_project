@@ -139,10 +139,3 @@ indicating more difference between estimated values to ground truth.
 do not seem to have an strong effect in relative differences between estimated 
 data and true values. However, using less stringent setting might result in an 
 increase number of false positives
-
-## Acknowledgements
-
-This assignment is dedicated to David Rojas Rodríguez, who heard the author
-talk about expectation-maximization and equivalence classes for over a week. He 
-said to have enjoyed listening to audio messages about the topic as a podcast while 
-doing the dishes.
