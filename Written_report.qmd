@@ -13,9 +13,11 @@ editor: visual
 
 MDGE 610: Foundations of Bioinformatics.
 
-Dorian Rojas Villalta. Ph.D. Student. February 2026
+Dorian Rojas Villalta; Ph.D. Student.
 
-This document contains the responses for the four question of the assignment including reproducibility code when applicable. The overall github repository containing resulting files, individual codes, and track changes can be found at the following link: [MDGE610_final_project](https://github.com/dorinrojas/MDGE610_final_project).
+This document contains the responses for the four question of the assignment including reproducibility code when applicable. The overall github repository containing resulting files, individual codes, and track changes can be found at the following link: 
+
+> [MDGE610_final_project](https://github.com/dorinrojas/MDGE610_final_project).
 
 # First Section. Conceptual understanding
 
@@ -43,7 +45,7 @@ The missing data of the kallisto software is the equivalent classes of the trans
 
 The mathematical function that represents the likelihood function for the abundance quantitation of the RNA sequencing is:
 
-![likelihood function for RNA-seq (Bray et al. 2016)](log-likelihood_function_kallisto.png)
+![likelihood function for RNA-seq (Bray et al. 2016)](log-likelihood_function_kallisto.png){width=550}
 
 Here, $F$ and $T$ represent the total set of fragments ($f$) and transcripts ($t$), respectively. $l_t$ is the effective length of transcript $t$ (length with pseudoalignment) and $y_{f,t}$ is the compatibility matrix (where 1 is compatibility/pseudoalignment between $f$ and $t$ and 0 equals no compatibility). Finally, $\alpha_t$ represents the probability of selecting fragments from transcripts. Overall, this formula represents the product over equivalence classes, with $c_e$ being the number of counts observed of equivalence class $e$.
 
@@ -199,29 +201,211 @@ The output abundance file were further used for relative difference analysis bet
 
 ## Relative difference analysis
 
-The relative difference analysis aims to establish a relationship between each of the trial test parameters and the difference between estimated abundances to ground truth. For this, each output abundance files were compared against the known abundances provided by the professor individually. First, the unique transcripts identified for each trial were assessed using simple command line R (see code below). 
+The relative difference analysis aims to establish a relationship between each of the trial test parameters and the difference between estimated counts to ground truth. For this, each output abundance files were compared against the known counts provided by the professor. First, the unique transcripts identified in each trial were assessed using simple command line R (see code below). 
 
 ```{r}
-#express as a barplot. but these values will be later used a the size of the points in the heatmap comparing R from correlation analysis.
+#| output: false
+# Loading libraries
+library(tidyverse)
+library(paletteer)
+library(ggpubr)
+
+# Define wd directory (empiricalInvestigation)
+dir <- '/Users/dorianrojas-villalta/OneDrive - University of Calgary/2026 Winter term/MDGE 610 - Foundations of Bioinformatics/MDGE610_final_project/empiricalInvestigation/'
+
+# Uploading files
+## Trial files
+tsvFiles <- list.files(dir, pattern = '*.tsv', recursive = T, full.names = T)
+files <- list()
+
+for (file in tsvFiles) {
+  df <- read_tsv(file)
+  df <- df[, c('target_id', 'est_counts')]
+  df$target_id <- gsub('\\|.*', '', df$target_id) # Extracting only transcript id
+  colnames(df)[1] <- 'transcript_id'
+  
+  # Keeping only the `<prefix>-abundance` name
+  files[[sub('\\.tsv$', '', basename(file))]] <- df
+}
+
+## Ground truth file
+groundTruth <- read_tsv(paste0(dir, 'sim_true_counts.txt'))
+
+# Compare false positives 
+falsePos <- data.frame(
+  file = names(files), 
+  counts = sapply(files, function(x) { 
+    diff <- anti_join(x, groundTruth, by = 'transcript_id') 
+    diff <- filter(diff, est_counts > 0)
+    nrow(diff)
+    }) 
+  )
+
+# Adding number of iterations. These were collected manually from the terminal output; unfortunately, they do not appear in the .json file.
+falsePos$iterations <- c(174, 230, 411, 411, 1237, 379, 504, 867, 1280, 5842,
+                         481, 683, 1095, 1825, 7828, 584, 1019, 1324, 2230,
+                         10000, 687, 1050, 1552, 2615, 10000)
+
+rownames(falsePos) <- NULL # Personal preference
 ```
-
-Here, we aim to identified the count of transcript that were only found in the trial test, but not in the ground truth, indicating a false positive identification in the pseudoalignment. The results show [].
-
-In order to understand the if there is an association between the trial parameters values and the difference in expected abundances and ground truth, a correlation analysis was conducted. This analysis compared how the values from the estimated abundances relate to those true abundances. The output of the correlation analysis is an R value that indicates how correlated how similar the values both abundances tables, with 1 being highly similar and 0 being entirely different. This R value can be used for assessing how the alteration of convergence criteria affect the abundance estimation. 
 
 ```{r}
+#| fig-width: 12
+#| fig-height: 8
+
+theme <- theme_classic() + 
+  theme(legend.title = element_text(size = 15, face='bold'),
+        legend.text = element_text(size = 12),
+        axis.title = element_text(size = 15, face = 'bold'),
+        axis.text = element_text(size = 12), 
+        strip.text = element_text(size = 12, face = 'bold'), 
+        legend.position = 'top')
+set_theme(theme)
+
+
+# Graphing
+g1 <- ggplot(falsePos, aes(file, counts, colour = file, fill = file)) + 
+  geom_col() +
+  labs(x = 'Trial',
+       y = 'Counts of false positives',
+       fill = 'Trial',
+       colour = 'Trial') +
+  scale_fill_paletteer_d('colorBlindness::SteppedSequential5Steps') +
+  scale_colour_paletteer_d('colorBlindness::SteppedSequential5Steps') +
+  coord_flip()
+
+g2 <- ggplot(falsePos, aes(file, iterations, colour = file, fill = file)) + 
+  geom_col() +
+  labs(x = 'Trial',
+       y = 'Number of EM algorithm iterations',
+       fill = 'Trial',
+       colour = 'Trial') +
+    scale_fill_paletteer_d('colorBlindness::SteppedSequential5Steps') +
+  scale_colour_paletteer_d('colorBlindness::SteppedSequential5Steps') +
+  coord_flip() +
+   theme(
+    axis.title.y = element_blank(), # Remove x-axis title
+    axis.text.y = element_blank())
+
+ggarrange(g1, g2, nrow = 1, common.legend = T)
 ```
 
-Notably, []
+Here, we aim to identified the number of transcripts that were only found in the trials, but are not part of the ground truth, indicating potential false positive identifications. The results show an overall persistence of false positive transcript identification across trials, with a maximum of 89 and minimum of 29. Interestingly, the highest number of false positives were detected in trials related to lower minimum abundance thresholds required ($\alpha_tN$ = 0.001 and 0.0001 for D and E trials respectively), and lower maximum variance between iterations (0.1% for Z trials). Decreasing the minimum abundance threshold reduces how conservative the expectation maximization (EM) algorithm is at defining which transcripts are significant and optimizing the likelihood functions (meaning is less stringent). This consequent loss EM algorithm's conservative basis might be related, in part, to the higher number of false positive. Moreover, these trials reached the maximum number of iterations allowed by kallisto (10,000) before stopping the EM algorithm, which indicates the possibility of not achieved a proper maximization of the likelihood function, resulting in lack of accuracy.
 
-Finally, we combine both the individual false positive counts and the correlation coefficient to assess a final judgement regarding the effect of convergence parameters. 
+On the other hand, trials with fewer false positives varied, with at least one from each minimum abundance threshold setting (trials A to E), but were mostly represented by lower maximum variance threshold (1%, 0.5%, and 0.1% for X, Y, and Z trials, respectively). These preliminary results hypothesize that the maximum abundance variance between iteration might be the main driver of accuracy when compared to minimum abundance threshold in the kallisto software.
+
+In order to understand the if there is an association between the trial parameters values and the difference in estimated counts and ground truth, a correlation and root mean square error (RMSE) analyses were conducted. 
 
 ```{r}
-#just heatmap
+#| output: false
+# Correlation and rmse
+corrRMSE <- data.frame(
+  file = names(files),
+  coefficient = sapply(files, function(x) {
+    
+    ## Subsetting to remove false positives and normalise df dimensions
+    inter = intersect(x$transcript_id, groundTruth$transcript_id)
+    fileSubset <- subset(x, transcript_id %in% inter)
+    
+    corr <- cor(fileSubset$est_counts, groundTruth$true_counts, method = 'spearman')
+  }),
+  rmse = sapply(files, function(x) {
+    inter = intersect(x$transcript_id, groundTruth$transcript_id)
+    fileSubset <- subset(x, transcript_id %in% inter)
+    
+    rmse <- sqrt(mean((fileSubset$est_counts - groundTruth$true_counts)^2))
+  })
+)
+rownames(corrRMSE) <- NULL # Personal preference
+
+# Merging both sets into a final one for graphing
+fullResults <- merge(falsePos, corrRMSE, by = 'file')
+
+# Adding integer parameters
+fullResults$minAbundance <- rep(c(1.0, 0.1, 0.01, 0.001, 0.0001), each = 5)
+fullResults$maxVariance <- rep(c(2.0, 1.5, 1.0, 0.5, 0.1), 5)
 ```
 
-[]
+Correlation compares how the values from the estimated transcript counts relate to those true counts in the linear relationship. The output of the correlation analysis is an R value that indicates how associated the counts from both trial and ground truth are, with 1 being high correlation (either positive or negative) and 0 meaning no correlation. This R value can be used for assessing how the well the estimated counts track the true counts. To address the absolute differences between trials and ground truth, the RMSE is estimated. This is a measure of the magnitude of the errors, ranging from 0 to $\infty$ with values closer 0 representing less errors (perfect fit).
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+
+# Graphing
+g3 <- ggplot(fullResults, aes(maxVariance, minAbundance, fill = coefficient)) +
+  geom_tile() +
+  labs(
+    x = 'Maximum iteration variance (%)', 
+    y = 'Minimum abundance threshold (TPM)', 
+    fill = 'R coefficient') +
+  scale_fill_paletteer_c('grDevices::PRGn') +
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))) 
+
+g4 <- ggplot(fullResults, aes(maxVariance, minAbundance, fill = rmse)) +
+  geom_tile() +
+  labs(
+    x = 'Maximum iteration variance (%)', 
+    y = 'Minimum abundance threshold (TPM)', 
+    fill = 'RMSE') +
+  scale_fill_paletteer_c('grDevices::PRGn') +
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))) + 
+  theme(
+    axis.title.y = element_blank(), # Remove x-axis title
+    axis.text.y = element_blank()) +
+  guides(fill = guide_colourbar(barwidth = 8))
+
+ggarrange(g3, g4, legend = 'top')
+```
+
+Notably, the range of both correlation coefficient and RMSE values is small, resulting is almost very similar result regardless of trial. However, some trend are noticeable in out finding. For instance, there is a high linear relationship among those settings with less conservative power (maximum iteration variance 1.5 and 2.0, and minimum abundance threshold of 1.0). Interestingly, the previously mentioned settings with higher number of false positives and maximum number of iterations also presented a high R coefficient. When combining this analysis with the RMSE values, it is evidence that less stringent criteria results in less magnitude of errors in comparison with more conservative values.
+
+Finally, we address how the iterations affect the RMSE values according to the changes in the convergence criteria. Interestingly, an increase in the iteration of the EM algorithm results in higher error magnitudes. No clear association to the convergence criteria is defined besides the previously mentioned decrease in RMSE with less stringent criteria.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 7.7
+
+g5 <- ggplot(fullResults, aes(rmse, iterations, 
+                        fill = factor(minAbundance),
+                        colour = factor(minAbundance))) +
+  geom_point(size = 3) +
+  labs(
+    x = 'RMSE',
+    y = 'Number of EM algorithm iterations',
+    fill = 'Minimum abundance threshold (TPM)',
+    colour = 'Minimum abundance threshold (TPM)') +
+    scale_fill_paletteer_d('ggsci::default_aaas') +
+  scale_colour_paletteer_d('ggsci::default_aaas')+ 
+  theme(
+    axis.title.x = element_blank(), # Remove x-axis title
+    axis.text.x = element_blank())
+
+g6 <- ggplot(fullResults, aes(rmse, iterations, 
+                        fill = factor(maxVariance),
+                        colour = factor(maxVariance))) +
+  geom_point(size = 3) +
+  labs(
+    x = 'RMSE',
+    y = 'Number of EM algorithm iterations',
+    fill = 'Maximum iteration variance (%)',
+    colour = 'Maximum iteration variance (%)') +
+    scale_fill_paletteer_d('ggsci::default_aaas') +
+  scale_colour_paletteer_d('ggsci::default_aaas')
+
+ggarrange(g5, g6, nrow = 2)
+```
 
 ## Conclusions
 
-[]
+- Decreasing the minimum abundance threshold reduces EM-algorithm conservative measures (less stringent), leading to a higher number of false positives. Also, this increases the number of iterations required to achieve convergence in the maximum likelihood estimates. 
+
+- Convergence criteria settings here tested resulted in small, almost neglectable, changes in both correlation coefficient and RMSE analysis. Beyond this, less stringent parameters resulted in higher values of these tests.
+
+- Higher number of iteration in the EM-algorithm result in higher RMSE, indicating more difference between estimated values to ground truth.
+
+- Overall, the here tested modifications to EM-algorithm convergence criteria do not seem to have an strong effect in relative differences between estimated data and true values. However, using less stringent setting might result in an increase number of false positives
