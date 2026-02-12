@@ -1,5 +1,5 @@
 ---
-title: "Written Report"
+title: "Final Assignment MDGE 610"
 author: "Dorian Rojas Villalta"
 format: pdf
 include-in-header: 
@@ -9,13 +9,11 @@ include-in-header:
 editor: visual
 ---
 
-# Final assignment written report.
-
-MDGE 610: Foundations of Bioinformatics.
+# Written report.
 
 Dorian Rojas Villalta; Ph.D. Student.
 
-This document contains the responses for the four question of the assignment including reproducibility code when applicable. The overall github repository containing resulting files, individual codes, and track changes can be found at the following link: 
+This document responds to assignment theoretical questions and empirical investigation analysis (including executable code). The Github repository containing this pdf-rendered document, a summary `README.md` file, and change tracking information can be found at the following link: 
 
 > [MDGE610_final_project](https://github.com/dorinrojas/MDGE610_final_project).
 
@@ -25,41 +23,41 @@ This document contains the responses for the four question of the assignment inc
 
 **What is the EM algorithm?**
 
-The expectation maximization algorithm is a general approach for the iteration of computational calculations of maximum likelihood estimates as the function of the observed data. This allows for the optimization of the log-likelihood values for observed data as well as 'incomplete data', where the calculation of maximum likelihood estimate is complex due to missing variables or weights unbalance. For instance, linear regression represents a statistical approach to understand the association of several variables into an specific outcome as modeled of a linear function. The effect of each variable is represented by a coefficient that decreases the sum of squares residuals (discrepancy between observed data and model prediction). These measure are commonly optimized by the least-squares estimation. Under expectation maximization algorithm, the influence of missing data can be expected based on the observed data (expectation; E-step) and least-squares estimation can be performed using the re-calculated variables (maximization, M-step). Overall, the expectation maximization algorithm favors estimation of statistics for models with incomplete data.
+The expectation maximization (EM) algorithm is a general approach for the iteration of computational calculations of maximum likelihood estimates (MLEs) as a function of the observed data (called 'incomplete data'). This allows for the optimization of the log-likelihood objective function on incomplete data, where the calculation of MLEs is complex due to missing variables or unbalanced weights. For instance, linear regression is a statistical approach to understand the linear association of variables into an specific outcome. The effect of each variable is represented by a coefficient that decreases the sum of squares residuals (discrepancy between observed data and model prediction; SSRs). These measures are commonly optimized by least-squares estimations (LSEs). Under EM algorithms, the influence of missing data can be expected based on the observed data (expectation; E-step) and LSEs can be performed using the predicted complete data (maximization, M-step).
 
 **What objective function does it maximize?**
 
-The expectation maximization algorithm aims to maximize the log-likelihood function of the observed data; the statistical model underlying the maximum likelihood estimation. This is a measure of how the statistical model explain the observed data. In simpler words, it is the probability of seeing the observed data given the model. This function is commonly used in the frequentist statistics for reducing errors such as the least-squares estimation from linear regression modelling.
+The expectation maximization algorithm aims to maximize the log-likelihood function; the statistical calculations underlying the maximum likelihood estimation. This is a measure of how the statistical model explains the observed data ($L(\theta) = P(Data | \theta)$). In simpler words, it is the probability of seeing the observed data given the model. This function is commonly used in frequentist statistics for reducing errors such as the least-squares estimation from linear regression modelling.
 
 **What are the E-step and M-Step, conceptually?**
 
-The expectation step or E-step corresponds to the section of the algorithm that allows for the estimation of the sufficient statistics of the complete data based on the observed data. Sufficient statistics represents all the information that can be obtained from a dataset; thus, the E-step aims to calculate all the possible information from the observed data for the complete data filling for missing values. Furthermore, the maximization step or M-step represents the recalculation of the maximum likelihood function (log-likelihood) by using the expected complete data instead of the observed data. This way, it allows for maximizing the objective function with the completed data ignoring the constrains of the missing values.
+The expectation step or E-step corresponds to the algorithm section that performs an estimation of sufficient statistics based on the observed data for generating complete data. Sufficient statistics is defined as all the information that can be obtained from a dataset; hence, the E-step aims to predict all the possible information from the observed data to fill missing values on the complete data. Furthermore, the maximization step or M-step conducts a recalculation of the maximum likelihood objective function (log-likelihood) using the predicted complete data instead of the observed data. This way, it allows for maximizing (optimizing) the maximum likelihood estimate with the completed data ignoring the constrains of the missing values.
 
 **What constitutes the missing data in kallisto's application of EM?**
 
-The missing data of the kallisto software is the equivalent classes of the transcript. An equivalent class is a multi-set of transcripts associated with a read indicating which transcript the read could have originated from. This provides the identity of the read as well as their overlap with the reference (E-step), providing enough information (sufficient statistics) for abundance estimation (M-step). 
+The missing data of the kallisto software is the equivalent classes of the transcript. An equivalent class is a multi-set of transcripts associated with a read, indicating which transcript the read could have originated from. This provides the identity of the read and their overlap with the reference (E-step), providing count numbers for abundance estimation (M-step). 
 
 ## kallisto's Objective Function
 
 **What is the mathematical form of the objective function?**
 
-The mathematical function that represents the likelihood function for the abundance quantitation of the RNA sequencing is:
+The mathematical function that represents the likelihood function for the abundance quantification of the RNA sequencing data is:
 
 ![likelihood function for RNA-seq (Bray et al. 2016)](log-likelihood_function_kallisto.png){width=550}
 
-Here, $F$ and $T$ represent the total set of fragments ($f$) and transcripts ($t$), respectively. $l_t$ is the effective length of transcript $t$ (length with pseudoalignment) and $y_{f,t}$ is the compatibility matrix (where 1 is compatibility/pseudoalignment between $f$ and $t$ and 0 equals no compatibility). Finally, $\alpha_t$ represents the probability of selecting fragments from transcripts. Overall, this formula represents the product over equivalence classes, with $c_e$ being the number of counts observed of equivalence class $e$.
+Here, $F$ and $T$ represent the total set of fragments ($f$) and transcripts ($t$), respectively. $l_t$ is the effective length of transcript $t$ (length with pseudoalignments) and $y_{f,t}$ the compatibility matrix (where 1 is compatibility between $f$ and $t$ and 0 equals no compatibility; meaning chance of pseudoalignment). Finally, $\alpha_t$ is the probability of selecting fragments from transcripts. Overall, this formula indicates the transcript abundance as a function of the product over equivalence classes, with $c_e$ being the number of counts observed for equivalence class $e$.
 
 **How does kallisto's EM implementation maximize it?**
 
-The expectation maximization algorithm implemented by kallisto aims to expect the equivalence classes (the transcript from which the read might come from) by maximizing the probability of selecting a fragment from a specific transcript $\alpha_t$. This means that it optimizes the chances of obtaining a read to be associated to an specific transcript, which would serve as the needed information for estimation of their respective abundance.
+The expectation maximization algorithm implemented by kallisto aims to predict the equivalence classes (the transcript from which the read might come from) by maximizing the probability of selecting a fragment from a specific transcript $\alpha_t$. This means that it optimizes the chances of obtaining a read to be associated to an specific transcript, which would serve as the needed information (counts) for estimation of transcript abundance.
 
-Another advantage of kallisto is that the EM-optimized likelihood function is defined in term of equivalent classes. This allows for a significant reduction in the dataset that needs to be analyze, resulting in a faster sotfware in comparison to previous tools that conduct alignments.
+Morever, another advantage of kallisto is that the EM-optimized likelihood function is defined in term of equivalent classes. This allows for a significant reduction in the dataset that needs to be analyze, resulting in a faster sotfware in comparison to other alignment-based tools.
 
 **What convergence criteria does kallisto use to decide when to stop iterating? Where are these specified in the code?**
 
-The convergence criteria for stopping the iterations is determine by the total expected value of fragment belonging to an specific transcript ($\alpha_tN$). Authors define the end of the iterations as for when every transcript $t$, the total expected value is above 0.01 transcript per million (TPM) allowing for a change less than 1% iteration to iteration. In simpler words, the iterations of the expectation maximization algorithm stop when all of the transcripts have an minimum 0.01 TPM abundance and its variance is less than 1% between iterations.
+The convergence criteria for stopping the iterations is determined by the total expected value of fragment belonging to an specific transcript ($\alpha_tN$; probability times the total number of transcripts). Authors defined the end of the iterations as for when every transcript $t$, the total expected value is above 0.01 transcript per million (TPM) and the variance between iterations is less than 1%. In simpler words, the EM algorithm will stop when all transcripts have a minimum 0.01 TPM abundance and maximum variance is less than 1% between iterations.
 
-This specification is stated in the source code for the EM algorithm of the kallisto software. The file can be found at the directory `/kallisto/src/EMAlgorithm.h`. The specific location of this convergence criteria can be found in the lines [100-104]:
+This specification is coded in the source EM algorithm file of the kallisto software, found at the directory `/kallisto/src/EMAlgorithm.h`. The convergence criteria are  declared in the lines 100-104:
 
 ```cpp
     double denom;
@@ -69,9 +67,9 @@ This specification is stated in the source code for the EM algorithm of the kall
     bool finalRound = false;
 ```
 
-Here, the main convergence criteria parameters are defined using the C++ code language. These are determine according to `[attributes] <data type> <variable name> = <value>`. Thus, `double` defines a double variable (with decimals), `const` a constant variable (not intended to be modified by the function), and `bool` a boolean variable (`true` or `false`). The variable `alpha_limit` is the minimum threshold of abundance of a transcript, `alpha_change_limit` is the threshold of abundance 0.01 TPM during maximization, and `alpha_change` is the allowed 1% abundance variability between iterations. Other variables such as `finalRound` determines the end of iterations (see below), and `denom` is an empty variable for later calculation of the denominator for normalizing read counts in case raw counts are provided.
+Here, the main convergence criteria are defined using C++ coding language. The overall syntax is `[attributes] <data type> <variable name> = <value>`. Hence, `double` means a double variable (with decimals), `bool` a boolean (`true` or `false`), and `const` is an attribute of constant (not intended to be modified by the function). The variable `alpha_limit` is the overall minimum abundance, `alpha_change_limit` the minimum abundance threshold 0.01 TPM during maximization ($\alpha_tN$ > 0.01), and `alpha_change` is the maximum 1% variance between iterations. `denom` is an empty variable for reads counts normalization.
 
-The test of the convergence criteria is set in the code lines [173-209, comments removed]
+Moreover, the EM algorithm end is declared on `finalRound` which starts as `false` until convergence is tested [lines 173-209, commented code removed]:
 
 ```cpp
  bool stopEM = false; //!finalRound && (i >= min_rounds); // false initially
@@ -100,9 +98,9 @@ The test of the convergence criteria is set in the code lines [173-209, comments
       }
 ```
 
-This defines the boolean variable `stopEM` to `false` prior assessing for the convergence criteria and the integer `chcount` that keeps track of over 1% variation changes in the `alpha` variables (meaning expected abundance $\alpha_tN$), which would deem that there is no convergence yet. For all equivalence class (`ec`), the `next_alpha[ec]` (expected abundance of current iteration) are tested for minimum abundance threshold of 0.01 TPM and a variation to the previous iteration (`alpha_[ec]`) exceeding 1% (`alpha_change`). If this criteria is met, the `chcount` increases in one unit, else the value remains 0 (indicating convergence). Also, previous iteration alpha variable (`alpha_[ec]`) is set with the value of current iteration before zeroing it for the next iteration. Later, the presence of convergence and minimum number of iteration (50) is checked (`chcount == 0 && i > min_rounds`) and, when true, the `stopEM` variable is set to `true`, indicating that this corresponds to the final iteration.
+This defines the boolean `stopEM` to `false` prior assessing for the convergence and declares integer `chcount` that counts for transcripts over both minimum abundance and iteration variation thresholds, which would deem no convergence. Here, for all equivalence classes (`ec`), the `next_alpha[ec]` (abundance of current iteration; $\alpha_tN$) are tested for minimum abundance threshold of 0.01 TPM and a, abundance variation to previous iteration (`alpha_[ec]`) exceeding 1% (`alpha_change`). If this criteria is met, the `chcount` increases in one unit, else the value remains 0 (indicating convergence). Also, previous iteration (`alpha_[ec]`) stores the values of current iteration before zeroing it for the next iteration (`next_alpha[ec] = 0.0`). Later, convergence and minimum number of iteration (50) are checked (`chcount == 0 && i > min_rounds`). When true, the `stopEM` variable is set to `true`, indicating that this corresponds to the final iteration.
 
-It is important to notice that this structure also checks for whether the current iteration is the final round, leading to a break in the expectation maximization algorithm. This variable (`finalRound`) is defined a few lines after this convergence check loop [lines 211-221]:
+This structure checks for whether the current iteration is the final (`if (finalRound)`), leading to a stopping EM algorithm. The boolean `finalRound` is declared a few lines after the convergence assessment [lines 211-221]:
 
 ```cpp
       //std::cout << maxChange << std::endl;
@@ -118,29 +116,29 @@ It is important to notice that this structure also checks for whether the curren
       }
 ```
 
-This specific loop of the expectation maximization function indicates that when the boolean variable `stopEM` becomes true, meaning that convergence has been met, the total equivalence classes will be filtered. Within this control structure, the `finalRound` variable is defined as `true`, which will allow for breaking the expectation maximization in the structure defined above. Also, current iteration values of expected abundance are save on a different variable (`alpha_before_zeroes_`), most probably as a backup. Then, the values of each equivalence class (`alpha_[ec]`) are zeroing if their value is lower than `alpha_limit/10.0`. Overall, these commands define the end of the algorithm and filter low abundance equivalence classes.
+This loop of the EM function defines that when the boolean `stopEM` becomes true, meaning that convergence has been met, the algorithm will stop and estimated abundances will be filtered. Within this control structure, `finalRound` is declared `true`, which will break the EM algorithm in the convergence assessment. Current iteration values are stored on a different variable (`alpha_before_zeroes_`), probably as a backup. Then, each equivalence class values (`alpha_[ec]`) are zero-ed if their value is lower than `alpha_limit/10.0`. Overall, these commands define the end of the algorithm and filter low abundance equivalence classes.
 
 **How might these criteria be justified?**
 
-Since the criteria is based on a minimum threshold of abundance for each of the equivalence classes, it might indicate this is a value considered expected in RNA-seq quantification analysis. In other words, it is expected to find transcripts of minimum abundance 0.01 TPM to be reliable in alignment-based quantification and lower abundance could be associated to alignment mismatches. Moreover, another criteria used to determine convergence is less than 1% variation in expected abundance estimation between iterations. This is based on the premise of the expectation maximization algorithm where standard deviation of the likelihood function is considered to be constant when its maximum estimate is reached. 
+Since the criteria is based on a minimum abundance threshold for each equivalence class, it might indicate this is a value considered expected in RNA-seq quantification analysis. In other words, it is expected to find minimum abundance of 0.01 TPM to be reliable in alignment-based quantification and lower abundances could be associated to alignment mismatches. Moreover, the other convergence criteria is the maximum variation threshold of 1% between iterations. This is based on the EM algorithm premise where standard deviation of the likelihood objective function is considered to be constant when likelihood maximum estimates are reached. 
 
-Regardless of the fundamental basis for the selection of the criteria, authors do not declare the logic behind defining these variable to minimum threshold of 0.01 TPM and maximum variance of 1% between iteration. In order to understand the rationale, this assignment aims to understand the effect of convergence criteria values into the relative difference between analyzed simulated data and their ground truth (see Second Section. Empirical investigation).
+Regardless of the fundamental basis for criteria selection, authors do not declare the logic behind defining the specific values 0.01 TPM and 1% variance. In order to assess the rationale, this assignment aims to understand the effect of convergence criteria values into relative differences between simulated data and their ground truth (see Second Section. Empirical investigation).
 
 ## Local vs. Global Maxima
 
 **Examine how kallisto initializes its abundance estimates**
 
-The abundance estimation of the equivalence classes initializes from the so-called pseudoalignment performed by the kallisto software. This approach is set to identify the transcript from which the read might have been originated without information regarding position alignment. For this, hashing of $k$-mers (nucleotide sequences of $k$ lenght) for both the reference (transcriptome de Brujin graph) and the input reads is conducted. Hashing refers of transforming the proper sequences into numerical values. These values are then use to find the best pairwise match between the reads and reference, which results in reads assigned to a specific path of the reference transcriptome. The vertices of this matching are different read $k$-mers called $k$-compatibility classes. It is considered that these classes of an error-free read coincide with the equivalence class of the read (the transcript from where the read could have been originated). The equivalence classes are commonly estimated from alignment-based quantification approaches, which are time-consuming and computationally-demanding. However, by conducting a pseudoalignment that estimates an equivalent $k$-compatibility classes, these can serve as the initial abundance estimate for the expectation maximization algorithm.
+The equivalence classes abundance estimation initializes from the pseudoalignment performed by the kallisto software. This approach identifies the transcript from which the read might have been originated without alignment information. For this, a hashing of $k$-mers (nucleotide sequences of $k$ length) for both reference (transcriptome de Brujin graph) and input reads is conducted. Hashing refers to transforming the proper sequences into numerical values. These values are then used to find the best pairwise match between the reads and reference, which results in reads assigned to an specific path of the reference de Brujin graph. The matched vertices are different read $k$-mers defined as $k$-compatibility classes. It is considered that the $k$-compatibility class of an error-free read coincide with its equivalence class. The equivalence classes are commonly estimated from alignment-based quantification approaches, which are time-consuming and computationally-demanding. However, by conducting a pseudoalignment that estimates an equivalent $k$-compatibility classes, these can serve as the initial abundance estimate for the EM algorithm.
 
 **Do you think initialization matter for this problem? Why or why not?**
 
-Yes, the aim of the expectation maximization algorithm is to conduct an estimation of missing data (equivalence classes) from the observed data ($k$-compatibility classes) in order to maximize the likelihood estimate (transcript abundance). Without this initialization process, the algorithm could not be implemented. The novelty of kallisto relies on the implementation of the pseudoalignment, a faster and computationally-lighter method of quantification, with the EM-function, a rapid and accurate optimization of objective function, to complete the missing information require to obtain reliable transcripts abundance estimates.
+Yes, the EM algorithm aim is predict missing data (equivalence classes) from the observed data ($k$-compatibility classes) in order to maximize the maximum likelihood estimates (transcript abundance). Without this initialization process, the algorithm could not be implemented. The novelty of kallisto relies on the implementation of pseudoalignment, faster and computationally-lighter than alignment, with the EM algorithm, accurate objective function optimization, to predict missing information require to obtain reliable transcripts abundance estimates.
 
 # Second Section. Empirical investigation
 
 ## Testing Convergence Criteria
 
-As previously mentioned, this assignment aims to understand the effect of convergence criteria values into the relative difference between analyzed simulated data and their ground truth. For this, the convergence criteria of minimum threshold of abundance (`alpha_change_limit`) and maximum variance between iteration (`alpha_change`) were modified in the `EMAlgorithm.h` file. 
+As previously mentioned, this assignment aims to understand the effect of convergence criteria into the relative difference between simulated data and its ground truth. For this, the convergence criteria of minimum abundance threshold (`alpha_change_limit`) and maximum variance between iterations (`alpha_change`) were modified in the `EMAlgorithm.h` file. 
 
 The altered software ran on MacBook Air with Apple M4 10 cores and 16GB of RAM local system. The rebuild of each modified binary was conducted using the following code on local terminal, similar to the initial installation (see `README.md`). 
 
@@ -158,9 +156,9 @@ CMAKE_POLICY_VERSION_MINIMUM=3.5 make -j$(sysctl -n hw.ncpu) || make -j$(sysctl 
 
 ### Parameters modification
 
-A total of five alterations per convergence criteria was performed, with specific unit change based on their nature, resulting in a total of 25 trials. Minimum abundance threshold is estimated in transcript per million (TPM) and, due its magnitude, it was modified in the logarithmic scale. The maximum variance between iterations is measured as a percentage; thus, change rate was set at 0.5 percentage ranges with a minimum of 0.1%. 
+A total of five alterations per convergence criteria were performed, with specific unit change based on their nature, resulting in a total of 25 trials. Minimum abundance threshold is estimated in transcript per million (TPM) and, due its magnitude, it was modified in the logarithmic scale. The maximum variance between iterations is measured as a percentage; hence, change rate was 0.5 percentage ranges with a minimum of 0.1%.
 
-The five trials for each convergence criteria included the default value and other four unit alteration were defined in a standard deviation basis around the default. Each parameter value was defined with an alphabet letter (abundance threshold = A-E; variance threshold = Z-V). The overview of the groups used for testing as well as the modified parameter values can be found in @tbl-1 and @tbl-2. Additionally, a paired combination of assigned letters was used as an output folder prefix of the kallisto trial for tracking purposes (@tbl-3). For instance, the quantification output folder with kallisto's default settings is named `/CX-output/`. 
+The five trials for each convergence criteria included the default value and other four unit alteration were defined in a standard deviation basis around the default. Each parameter value was assigned with an alphabet letter (abundance threshold = A-E; variance threshold = Z-V). The overview of the groups used for testing and exact parameter values can be found in @tbl-1 and @tbl-2. Additionally, a paired combination of letters was used as an output folder prefix of the kallisto trial for tracking purposes (@tbl-3). For instance, the quantification output folder with kallisto's default settings is named `/CX-output/`. 
 
 | A | B | C (default) |  D  |  E  |
 |:---:|:---:|:-------------:|:-----:|:-----:|
@@ -172,7 +170,7 @@ The five trials for each convergence criteria included the default value and oth
 |:---:|:---:|:-------------:|:---:|:---:|
 |0.1|0.5|      1.0      |1.5| 2.0 |
 
-: Maximum variance between EM-algorithm iterations (`alpha_change`) modifications for testing. {#tbl-2} 
+: Maximum variance between EM algorithm iterations (`alpha_change`) modifications for testing. {#tbl-2} 
 
 |   |  A | B  | C (default) |  D | E  |
 |:---|:----:|:----:|:-------------:|:----:|:----:|
@@ -184,7 +182,7 @@ The five trials for each convergence criteria included the default value and oth
 
 : Prefix combinations for convergence criteria analysis. {#tbl-3}
 
-All kallisto trials were conducted using the following command:
+All kallisto trials were conducted using the same command for computational consistency.
 
 ```bash
 kallisto/build/src/kallisto quant \
@@ -194,14 +192,14 @@ kallisto/build/src/kallisto quant \
   empiricalInvestigation/00-raw-data/sim_reads_2.fastq.gz
 ```
 
-As defined, all results are stored in the `/empiricalInvestigation/` folder 
-available at this github repository. Additionally, each algorithm alteration was mirrored into a copy-file present at same folder and was committed to the repository joint with output files for track changes purposes.
+All results are stored in the `/empiricalInvestigation/` folder 
+available at this github repository. Additionally, each EM algorithm alteration was mirrored into a copy-file present at same folder and was committed with output files for track changes purposes.
 
-The output abundance file were further used for relative difference analysis between the different tested code modifications.
+The output abundance file were further used for relative difference analysis between the different trials.
 
 ## Relative difference analysis
 
-The relative difference analysis aims to establish a relationship between each of the trial test parameters and the difference between estimated counts to ground truth. For this, each output abundance files were compared against the known counts provided by the professor. First, the unique transcripts identified in each trial were assessed using simple command line R (see code below). 
+The relative difference analysis aims to establish a relationship between each trial parameters and difference between estimated counts to ground truth (true counts). For this, each output abundance files were compared against the true counts provided by the professor. First, the unique transcripts identified in each trial were assessed using simple command line R (see code below). 
 
 ```{r}
 #| output: false
@@ -251,7 +249,7 @@ rownames(falsePos) <- NULL # Personal preference
 
 ```{r}
 #| fig-width: 12
-#| fig-height: 8
+#| fig-height: 7
 
 theme <- theme_classic() + 
   theme(legend.title = element_text(size = 15, face='bold'),
@@ -290,11 +288,13 @@ g2 <- ggplot(falsePos, aes(file, iterations, colour = file, fill = file)) +
 ggarrange(g1, g2, nrow = 1, common.legend = T)
 ```
 
-Here, we aim to identified the number of transcripts that were only found in the trials, but are not part of the ground truth, indicating potential false positive identifications. The results show an overall persistence of false positive transcript identification across trials, with a maximum of 89 and minimum of 29. Interestingly, the highest number of false positives were detected in trials related to lower minimum abundance thresholds required ($\alpha_tN$ = 0.001 and 0.0001 for D and E trials respectively), and lower maximum variance between iterations (0.1% for Z trials). Decreasing the minimum abundance threshold reduces how conservative the expectation maximization (EM) algorithm is at defining which transcripts are significant and optimizing the likelihood functions (meaning is less stringent). This consequent loss EM algorithm's conservative basis might be related, in part, to the higher number of false positive. Moreover, these trials reached the maximum number of iterations allowed by kallisto (10,000) before stopping the EM algorithm, which indicates the possibility of not achieved a proper maximization of the likelihood function, resulting in lack of accuracy.
+Here, we aimed to identified the number of transcripts that were only found in the trials, but are not part of the true counts, indicating potential false positives. The results showed an overall persistence of false positives transcript identification across all trials, with a maximum of 89 and minimum of 29. 
+
+Interestingly, the highest number of false positives were detected in trials related to lower minimum abundance thresholds ($\alpha_tN$ = 0.001 and 0.0001 for D and E trials respectively), and lower maximum variance between iterations (0.1% for Z trials). Decreasing the minimum abundance threshold reduces how conservative (stringent) the expectation maximization (EM) algorithm is at defining which transcripts are used for convergence assessment and optimizing the objective function. This consequent loss of EM algorithm's stringiness might be related, in part, to the higher number of false positive. Moreover, these trials reached the maximum number of iterations allowed by kallisto (10,000) before forceably stopping the EM algorithm, which indicates the possibility of not achieved a proper maximization of MLEs, resulting in lack of accuracy.
 
 On the other hand, trials with fewer false positives varied, with at least one from each minimum abundance threshold setting (trials A to E), but were mostly represented by lower maximum variance threshold (1%, 0.5%, and 0.1% for X, Y, and Z trials, respectively). These preliminary results hypothesize that the maximum abundance variance between iteration might be the main driver of accuracy when compared to minimum abundance threshold in the kallisto software.
 
-In order to understand the if there is an association between the trial parameters values and the difference in estimated counts and ground truth, a correlation and root mean square error (RMSE) analyses were conducted. 
+In order to understand if there is an association between the convergence criteria values and the difference in estimated counts and ground truth, a correlation and root mean square error (RMSE) analyses were conducted. 
 
 ```{r}
 #| output: false
@@ -326,7 +326,7 @@ fullResults$minAbundance <- rep(c(1.0, 0.1, 0.01, 0.001, 0.0001), each = 5)
 fullResults$maxVariance <- rep(c(2.0, 1.5, 1.0, 0.5, 0.1), 5)
 ```
 
-Correlation compares how the values from the estimated transcript counts relate to those true counts in the linear relationship. The output of the correlation analysis is an R value that indicates how associated the counts from both trial and ground truth are, with 1 being high correlation (either positive or negative) and 0 meaning no correlation. This R value can be used for assessing how the well the estimated counts track the true counts. To address the absolute differences between trials and ground truth, the RMSE is estimated. This is a measure of the magnitude of the errors, ranging from 0 to $\infty$ with values closer 0 representing less errors (perfect fit).
+Correlation compares how the estimated transcript counts relate to true counts in a linear relationship. The correlation analysis output is a correlation coefficient (R) that indicates how are predicted and true counts associated. This ranges between 1, being high correlation (either positive [+1] or negative [-1]) and 0, meaning no correlation. This R coefficient can be used for assessing how the well the estimated counts track to the true counts. Moreover, to address the absolute differences between trial and ground truth, the RMSE wass estimated. This is a measure of the magnitude of errors, ranging from 0 to $\infty$ with values closer to 0 representing less errors (closer to perfect fit).
 
 ```{r}
 #| fig-width: 10
@@ -362,13 +362,11 @@ g4 <- ggplot(fullResults, aes(maxVariance, minAbundance, fill = rmse)) +
 ggarrange(g3, g4, legend = 'top')
 ```
 
-Notably, the range of both correlation coefficient and RMSE values is small, resulting is almost very similar result regardless of trial. However, some trend are noticeable in out finding. For instance, there is a high linear relationship among those settings with less conservative power (maximum iteration variance 1.5 and 2.0, and minimum abundance threshold of 1.0). Interestingly, the previously mentioned settings with higher number of false positives and maximum number of iterations also presented a high R coefficient. When combining this analysis with the RMSE values, it is evidence that less stringent criteria results in less magnitude of errors in comparison with more conservative values.
-
-Finally, we address how the iterations affect the RMSE values according to the changes in the convergence criteria. Interestingly, an increase in the iteration of the EM algorithm results in higher error magnitudes. No clear association to the convergence criteria is defined besides the previously mentioned decrease in RMSE with less stringent criteria.
+The range of both correlation coefficient and RMSE values is narrow, resulting is almost very similar statistics regardless of trial settings. However, some trends are noticeable in our finding. For instance, there is a high linear relationship among those less stringent trials (maximum iteration variance 1.5 and 2.0, and minimum abundance threshold of 1.0). Interestingly, the settings with higher number of false positives and maximum number of iterations also presented a high R coefficient. When combining this analysis with the RMSE values, it is evidence that less stringent criteria results in less magnitude of errors in comparison with more conservative values.
 
 ```{r}
 #| fig-width: 10
-#| fig-height: 7.7
+#| fig-height: 7
 
 g5 <- ggplot(fullResults, aes(rmse, iterations, 
                         fill = factor(minAbundance),
@@ -376,7 +374,7 @@ g5 <- ggplot(fullResults, aes(rmse, iterations,
   geom_point(size = 3) +
   labs(
     x = 'RMSE',
-    y = 'Number of EM algorithm iterations',
+    y = 'N EM algorithm iterations',
     fill = 'Minimum abundance threshold (TPM)',
     colour = 'Minimum abundance threshold (TPM)') +
     scale_fill_paletteer_d('ggsci::default_aaas') +
@@ -399,6 +397,7 @@ g6 <- ggplot(fullResults, aes(rmse, iterations,
 
 ggarrange(g5, g6, nrow = 2)
 ```
+Finally, we address how the number of iterations affect the RMSE values according to the convergence criteria settings. Interestingly, an increase in iteration number of the EM algorithm results in higher error magnitudes. No clear association to the convergence criteria settings is defined besides the previously mentioned decrease in RMSE with less stringent parameters.
 
 ## Conclusions
 
