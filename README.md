@@ -125,11 +125,26 @@ values definition and assigned letters combinations are stated below.
 
 The relative difference between each trial and the difference in estimated 
 abundances and ground truth were assessed using false positive/negative counts and 
-correlation analysis.
+correlation and root mean square error (RMSE) analyses.
 
 ## Main findings 
 
-[]
+- Decreasing the minimum abundance threshold reduces EM-algorithm conservative 
+measures (less stringent), leading to a higher number of false positives. Also, 
+this increases the number of iterations required to achieve convergence in the 
+maximum likelihood estimates. 
+
+- Convergence criteria settings here tested resulted in small, almost neglectable,
+changes in both correlation coefficient and RMSE analysis. Beyond this, less 
+stringent parameters resulted in higher values of these tests.
+
+- Higher number of iteration in the EM-algorithm result in higher RMSE, 
+indicating more difference between estimated values to ground truth.
+
+- Overall, the here tested modifications to EM-algorithm convergence criteria 
+do not seem to have an strong effect in relative differences between estimated 
+data and true values. However, using less stringent setting might result in an 
+increase number of false positives
 
 ## Acknowledgements
 
