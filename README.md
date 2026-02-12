@@ -124,7 +124,7 @@ values definition and assigned letters combinations are stated below.
 | **Z (0.1)** | AZ | BZ |     CZ      | DZ | EZ |
 
 The relative difference between each trial and the difference in estimated 
-abundances and ground truth were assessed using false positive counts and 
+abundances and ground truth were assessed using false positive/negative counts and 
 correlation analysis.
 
 ## Main findings 
